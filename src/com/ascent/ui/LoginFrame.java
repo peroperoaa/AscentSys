@@ -2,47 +2,23 @@ package com.ascent.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.IOException;
 import java.util.HashMap;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-
+import javax.swing.*;
 import com.ascent.bean.User;
 import com.ascent.util.UserDataClient;
 
-/**
- * 用户登陆窗体
- * @author ascent
- * @version 1.0
- */
 @SuppressWarnings("serial")
 public class LoginFrame extends JFrame {
 
 	protected JTextField userText;
-
 	protected JPasswordField password;
-
 	protected JLabel tip;
-
 	protected UserDataClient userDataClient;
 
-	/**
-	 * 默认的构造方法，初始化登陆窗体
-	 */
 	public LoginFrame() {
-
 		setTitle("用户登陆");
-
 		Container container = this.getContentPane();
 		container.setLayout(new BorderLayout());
 
@@ -51,8 +27,8 @@ public class LoginFrame extends JFrame {
 		JLabel userLabel = new JLabel("用户帐号：");
 		JLabel passwordLabel = new JLabel("用户密码：");
 
-		userText = new JTextField(20);
-		password = new JPasswordField(20);
+		userText = new JTextField(22);
+		password = new JPasswordField(22);
 
 		JButton loginButton = new JButton("登陆");
 		JButton regist = new JButton("注册");
@@ -73,9 +49,7 @@ public class LoginFrame extends JFrame {
 		setLocation(300, 100);
 
 		JPanel tipPanel = new JPanel();
-
 		tip = new JLabel();
-
 		tipPanel.add(tip);
 
 		container.add(BorderLayout.CENTER, loginPanel);
@@ -83,22 +57,20 @@ public class LoginFrame extends JFrame {
 
 		exitButton.addActionListener(new ExitActionListener());
 		loginButton.addActionListener(new LoginActionListener());
-		regist.addActionListener(new RegistActionListener())
-		;tempLoginButton.addActionListener(new TempLoginActionListener());
+		regist.addActionListener(new RegistActionListener());
+		tempLoginButton.addActionListener(new TempLoginActionListener());
 		this.addWindowListener(new WindowCloser());
+
 		try {
 			userDataClient = new UserDataClient();
 		} catch (IOException e) {
 			e.printStackTrace();
+			tip.setText("服务器连接失败.");
 		}
 
 		setLocationRelativeTo(null);
 	}
 
-
-	/**
-	 * 处理"退出"按钮事件监听的内部类
-	 */
 	class ExitActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
 			setVisible(false);
@@ -107,20 +79,17 @@ public class LoginFrame extends JFrame {
 		}
 	}
 
-	/**
-	 * 处理"登陆"按钮事件监听的内部类
-	 */
 	class LoginActionListener implements ActionListener {
-
 		public void actionPerformed(ActionEvent e) {
 			boolean bo = false;
 			HashMap userTable = userDataClient.getUsers();
+			User currentUser = null;
 			if (userTable != null) {
 				if (userTable.containsKey(userText.getText())) {
-					User userObject = (User) userTable.get(userText.getText());
+					currentUser = (User) userTable.get(userText.getText());
 					char[] chr = password.getPassword();
 					String pwd = new String(chr);
-					if (userObject.getPassword().equals(pwd)) {
+					if (currentUser.getPassword().equals(pwd)) {
 						bo = true;
 					}
 				}
@@ -128,7 +97,7 @@ public class LoginFrame extends JFrame {
 					userDataClient.closeSocKet();
 					setVisible(false);
 					dispose();
-					MainFrame myFrame = new MainFrame();
+					MainFrame myFrame = new MainFrame(currentUser); // 传入当前用户对象
 					myFrame.setVisible(true);
 				} else {
 					tip.setText("帐号不存在,或密码错误.");
@@ -139,20 +108,13 @@ public class LoginFrame extends JFrame {
 		}
 	}
 
-	/**
-	 * 处理"注册"按钮事件监听的内部类.
-	 */
 	class RegistActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent arg0) {
-			// 打开注册用户的窗口
 			RegistFrame registFrame = new RegistFrame();
 			registFrame.setVisible(true);
 		}
 	}
 
-	/**
-	 * 处理"关闭窗口"事件监听的内部类.
-	 */
 	class WindowCloser extends WindowAdapter {
 		public void windowClosing(WindowEvent e) {
 			setVisible(false);
@@ -160,18 +122,16 @@ public class LoginFrame extends JFrame {
 			userDataClient.closeSocKet();
 		}
 	}
-	/**
-	 * 处理"临时登录"按钮事件监听的内部类
-	 */
+
 	class TempLoginActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			// 直接跳过账号密码验证，直接进入主界面
-			userDataClient.closeSocKet();  // 关闭与服务器的连接
-			setVisible(false);  // 隐藏当前窗口
-			dispose();  // 释放窗口资源
-			MainFrame myFrame = new MainFrame();  // 打开主界面
+			userDataClient.closeSocKet();
+			setVisible(false);
+			dispose();
+			// 临时登录用户，authority=0的User对象
+			User tempUser = new User("tempUser", "noPass", 0);
+			MainFrame myFrame = new MainFrame(tempUser);
 			myFrame.setVisible(true);
 		}
 	}
-
 }

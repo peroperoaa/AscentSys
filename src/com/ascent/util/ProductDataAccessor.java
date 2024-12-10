@@ -54,7 +54,7 @@ public class ProductDataAccessor extends DataAccessor {
 	 */
 	@Override
 	public void load() {
-		
+
 		dataTable = new HashMap<String,ArrayList<Product>>();
 		userTable = new HashMap<String,User>();
 
@@ -175,4 +175,80 @@ public class ProductDataAccessor extends DataAccessor {
 		this.load();
 		return this.userTable;
 	}
+
+	//v1.0.1
+	public void addProduct(Product product) {
+		String category = product.getCategory();
+		if (!dataTable.containsKey(category)) {
+			dataTable.put(category, new ArrayList<Product>());
+		}
+		ArrayList<Product> products = dataTable.get(category);
+		products.add(product);
+		saveProducts();
+	}
+
+	public void removeProduct(String productName) {
+		// 遍历dataTable找到对应的产品并删除
+		for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
+			ArrayList<Product> products = entry.getValue();
+			Iterator<Product> it = products.iterator();
+			while (it.hasNext()) {
+				Product p = it.next();
+				if (p.getProductname().equalsIgnoreCase(productName.trim())) {
+					it.remove();
+					saveProducts();
+					return;
+				}
+			}
+		}
+	}
+
+	public void updateProduct(Product updatedProduct) {
+		// 根据产品名找到旧的产品并替换
+		String productName = updatedProduct.getProductname();
+		for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
+			ArrayList<Product> products = entry.getValue();
+			for (int i = 0; i < products.size(); i++) {
+				if (products.get(i).getProductname().equalsIgnoreCase(productName.trim())) {
+					products.set(i, updatedProduct);
+					saveProducts();
+					return;
+				}
+			}
+		}
+	}
+
+	public Product queryProduct(String productName) {
+		for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
+			for (Product p : entry.getValue()) {
+				if (p.getProductname().equalsIgnoreCase(productName.trim())) {
+					return p;
+				}
+			}
+		}
+		return null;
+	}
+
+	public void saveProducts() {
+		// 将dataTable中的数据写回product.db
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter(PRODUCT_FILE_NAME))) {
+			for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
+				ArrayList<Product> products = entry.getValue();
+				for (Product p : products) {
+					String line = p.getProductname() + ","
+							+ p.getCas() + ","
+							+ p.getStructure() + ","
+							+ p.getFormula() + ","
+							+ p.getPrice() + ","
+							+ p.getRealstock() + ","
+							+ p.getCategory();
+					writer.write(line);
+					writer.newLine();
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

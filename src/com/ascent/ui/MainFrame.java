@@ -4,28 +4,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import com.ascent.bean.User;
+
 /**
  * 艾斯医药主框架界面
- * @author ascent
- * @version 1.0
  */
 @SuppressWarnings("serial")
 public class MainFrame extends JFrame {
 
-	/**
-	 * tabbed pane组件
-	 */
 	protected JTabbedPane tabbedPane;
-
-	/**
-	 * 产品 panel
-	 */
 	protected ProductPanel productPanel;
+	protected ManagePanel managePanel; // 新增的管理面板
 
-	/**
-	 * 默认构造方法
-	 */
-	public MainFrame() {
+	protected User currentUser; // 存储当前登录用户信息
+
+	public MainFrame(User user) {
+		this.currentUser = user; // 接收当前用户对象
 
 		setTitle("欢迎使用AscentSys应用! ");
 
@@ -36,6 +30,12 @@ public class MainFrame extends JFrame {
 
 		productPanel = new ProductPanel(this);
 		tabbedPane.addTab("药品", productPanel);
+
+		// 根据用户权限决定是否添加管理面板
+		if (currentUser != null && currentUser.getAuthority() == 1) {
+			managePanel = new ManagePanel();
+			tabbedPane.addTab("管理", managePanel);
+		}
 
 		container.add(BorderLayout.CENTER, tabbedPane);
 
@@ -86,7 +86,6 @@ public class MainFrame extends JFrame {
 		helpMenu.setMnemonic('h');
 		aboutMenuItem.setMnemonic('a');
 
-		// 设定快捷键
 		exitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X,
 				ActionEvent.CTRL_MASK));
 
@@ -97,23 +96,16 @@ public class MainFrame extends JFrame {
 				ActionEvent.CTRL_MASK));
 	}
 
-	/**
-	 * 设定和选择外观
-	 */
 	protected void setupLookAndFeelMenu(JMenuBar theMenuBar) {
-
-		UIManager.LookAndFeelInfo[] lookAndFeelInfo = UIManager
-				.getInstalledLookAndFeels();
+		UIManager.LookAndFeelInfo[] lookAndFeelInfo = UIManager.getInstalledLookAndFeels();
 		JMenu lookAndFeelMenu = new JMenu("选项");
-		JMenuItem anItem = null;
 		LookAndFeelListener myListener = new LookAndFeelListener();
 
 		try {
 			for (int i = 0; i < lookAndFeelInfo.length; i++) {
-				anItem = new JMenuItem(lookAndFeelInfo[i].getName() + " 外观");
+				JMenuItem anItem = new JMenuItem(lookAndFeelInfo[i].getName() + " 外观");
 				anItem.setActionCommand(lookAndFeelInfo[i].getClassName());
 				anItem.addActionListener(myListener);
-
 				lookAndFeelMenu.add(anItem);
 			}
 		} catch (Exception e) {
@@ -122,40 +114,24 @@ public class MainFrame extends JFrame {
 		theMenuBar.add(lookAndFeelMenu);
 	}
 
-	/**
-	 * 退出方法.
-	 */
 	public void exit() {
 		setVisible(false);
 		dispose();
 		System.exit(0);
 	}
 
-	/**
-	 * "退出"事件处理内部类.
-	 */
 	class ExitActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
 			exit();
 		}
 	}
 
-	/**
-	 * 处理"关闭窗口"事件的内部类.
-	 */
 	class WindowCloser extends WindowAdapter {
-
-		/**
-		 * let's call our exit() method defined above
-		 */
 		public void windowClosing(WindowEvent e) {
 			exit();
 		}
 	}
 
-	/**
-	 * 处理"外观"选择监听器的内部类
-	 */
 	class LookAndFeelListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
 			String className = event.getActionCommand();
@@ -168,9 +144,6 @@ public class MainFrame extends JFrame {
 		}
 	}
 
-	/**
-	 * 处理"关于"菜单监听器的内部类
-	 */
 	class AboutActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent event) {
 			String msg = "超值享受!";
