@@ -51,11 +51,12 @@ public class LoginFrame extends JFrame {
 		JLabel userLabel = new JLabel("用户帐号：");
 		JLabel passwordLabel = new JLabel("用户密码：");
 
-		userText = new JTextField(15);
-		password = new JPasswordField(15);
+		userText = new JTextField(20);
+		password = new JPasswordField(20);
 
 		JButton loginButton = new JButton("登陆");
 		JButton regist = new JButton("注册");
+		JButton tempLoginButton = new JButton("临时登录");
 		JButton exitButton = new JButton("退出");
 
 		loginPanel.add(userLabel);
@@ -64,10 +65,11 @@ public class LoginFrame extends JFrame {
 		loginPanel.add(new JScrollPane(password));
 		loginPanel.add(loginButton);
 		loginPanel.add(regist);
+		loginPanel.add(tempLoginButton);
 		loginPanel.add(exitButton);
 
 		setResizable(false);
-		setSize(260, 150);
+		setSize(350, 150);
 		setLocation(300, 100);
 
 		JPanel tipPanel = new JPanel();
@@ -81,14 +83,18 @@ public class LoginFrame extends JFrame {
 
 		exitButton.addActionListener(new ExitActionListener());
 		loginButton.addActionListener(new LoginActionListener());
-		regist.addActionListener(new RegistActionListener());
+		regist.addActionListener(new RegistActionListener())
+		;tempLoginButton.addActionListener(new TempLoginActionListener());
 		this.addWindowListener(new WindowCloser());
 		try {
 			userDataClient = new UserDataClient();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		setLocationRelativeTo(null);
 	}
+
 
 	/**
 	 * 处理"退出"按钮事件监听的内部类
@@ -154,4 +160,18 @@ public class LoginFrame extends JFrame {
 			userDataClient.closeSocKet();
 		}
 	}
+	/**
+	 * 处理"临时登录"按钮事件监听的内部类
+	 */
+	class TempLoginActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			// 直接跳过账号密码验证，直接进入主界面
+			userDataClient.closeSocKet();  // 关闭与服务器的连接
+			setVisible(false);  // 隐藏当前窗口
+			dispose();  // 释放窗口资源
+			MainFrame myFrame = new MainFrame();  // 打开主界面
+			myFrame.setVisible(true);
+		}
+	}
+
 }
