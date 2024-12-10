@@ -1,5 +1,7 @@
 package com.ascent.ui;
 
+import com.ascent.util.ProductDataAccessor;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,7 +18,14 @@ public class ManagePanel extends JPanel {
     private JButton updateButton;
     private JButton queryButton;
 
-    public ManagePanel() {
+    //v1.0.1
+    private Frame parentFrame;
+    private ProductDataAccessor dataAccessor;
+
+    public ManagePanel(Frame parentFrame, ProductDataAccessor dataAccessor) {
+        this.parentFrame = parentFrame;
+        this.dataAccessor = dataAccessor;
+
         this.setLayout(new FlowLayout());
 
         addButton = new JButton("增加药品");
@@ -29,32 +38,32 @@ public class ManagePanel extends JPanel {
         this.add(updateButton);
         this.add(queryButton);
 
-        // 以下为示例事件监听器，请根据业务逻辑进行修改
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO: 打开新增药品对话框
-                JOptionPane.showMessageDialog(ManagePanel.this, "执行增加药品操作");
+                AddProductDialog dlg = new AddProductDialog(parentFrame, dataAccessor);
+                dlg.setVisible(true);
             }
         });
 
         deleteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO: 打开删除药品对话框或逻辑
-                JOptionPane.showMessageDialog(ManagePanel.this, "执行删除药品操作");
+                DeleteProductDialog dlg = new DeleteProductDialog(parentFrame, dataAccessor);
+                dlg.setVisible(true);
             }
         });
 
+
         updateButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO: 打开修改药品对话框或逻辑
-                JOptionPane.showMessageDialog(ManagePanel.this, "执行修改药品操作");
+                UpdateProductDialog dlg = new UpdateProductDialog(parentFrame, dataAccessor);
+                dlg.setVisible(true);
             }
         });
 
         queryButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // TODO: 打开查询药品对话框或逻辑
-                JOptionPane.showMessageDialog(ManagePanel.this, "执行查询药品操作");
+                QueryProductDialog dlg = new QueryProductDialog(parentFrame, dataAccessor);
+                dlg.setVisible(true);
             }
         });
     }

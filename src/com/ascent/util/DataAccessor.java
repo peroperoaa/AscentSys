@@ -78,11 +78,22 @@ public abstract class DataAccessor {
 	 * 增加新的产品
 	 * @param theProduct 被添加到购物车的商品
 	 */
+	//v1.0.1
 	public void addProduct(Product theProduct) {
 		String category = theProduct.getCategory();
 		log("添加新的产品:  " + theProduct);
+		// 从dataTable获取该分类的产品列表
 		ArrayList<Product> productList = dataTable.get(category);
+
+		// 如果没有这个分类的列表，则创建一个新的，并加入dataTable
+		if (productList == null) {
+			productList = new ArrayList<Product>();
+			dataTable.put(category, productList);
+		}
+
+		// 现在productList已经不为空，可以安全添加产品
 		productList.add(theProduct);
+
 		recentProductList.add(theProduct);
 		log("完成添加新的产品!\n");
 	}

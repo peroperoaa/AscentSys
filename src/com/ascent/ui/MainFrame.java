@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import com.ascent.bean.User;
+import com.ascent.util.ProductDataAccessor;
 
 /**
  * 艾斯医药主框架界面
@@ -17,6 +18,7 @@ public class MainFrame extends JFrame {
 	protected ManagePanel managePanel; // 新增的管理面板
 
 	protected User currentUser; // 存储当前登录用户信息
+	protected ProductDataAccessor productDataAccessor;
 
 	public MainFrame(User user) {
 		this.currentUser = user; // 接收当前用户对象
@@ -28,12 +30,14 @@ public class MainFrame extends JFrame {
 
 		tabbedPane = new JTabbedPane();
 
+		//v.1.0.1
+		productDataAccessor = new ProductDataAccessor();
 		productPanel = new ProductPanel(this);
 		tabbedPane.addTab("药品", productPanel);
 
-		// 根据用户权限决定是否添加管理面板
 		if (currentUser != null && currentUser.getAuthority() == 1) {
-			managePanel = new ManagePanel();
+			// 将productDataAccessor传给ManagePanel
+			managePanel = new ManagePanel(this, productDataAccessor);
 			tabbedPane.addTab("管理", managePanel);
 		}
 
@@ -94,6 +98,7 @@ public class MainFrame extends JFrame {
 
 		aboutMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
 				ActionEvent.CTRL_MASK));
+
 	}
 
 	protected void setupLookAndFeelMenu(JMenuBar theMenuBar) {

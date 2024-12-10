@@ -177,77 +177,70 @@ public class ProductDataAccessor extends DataAccessor {
 	}
 
 	//v1.0.1
-	public void addProduct(Product product) {
-		String category = product.getCategory();
-		if (!dataTable.containsKey(category)) {
-			dataTable.put(category, new ArrayList<Product>());
+	// ... 原有代码不变
+
+	/**
+	 * 根据产品名称删除产品
+	 * @param productName 要删除的产品名称
+	 * @return boolean 删除成功返回true，否则返回false
+	 */
+	public boolean deleteProduct(String productName) {
+		// 遍历dataTable，找到对应的分类和产品
+		for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
+			ArrayList<Product> list = entry.getValue();
+			Product toRemove = null;
+			for (Product p : list) {
+				if (p.getProductname().equalsIgnoreCase(productName)) {
+					toRemove = p;
+					break;
+				}
+			}
+			if (toRemove != null) {
+				list.remove(toRemove);
+				saveAllProducts(); // 删除后保存
+				return true;
+			}
 		}
-		ArrayList<Product> products = dataTable.get(category);
-		products.add(product);
-		saveProducts();
+		return false;
 	}
 
-	public void removeProduct(String productName) {
-		// 遍历dataTable找到对应的产品并删除
+	/**
+	 * 更新产品信息（根据产品名称查找产品，然后更新其他信息）
+	 * @param updatedProduct 包含新信息的产品对象（名称、CAS必须与原产品一致才能找到并更新）
+	 * @return boolean 更新成功返回true，否则返回false
+	 */
+	public boolean updateProduct(Product updatedProduct) {
 		for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
-			ArrayList<Product> products = entry.getValue();
-			Iterator<Product> it = products.iterator();
-			while (it.hasNext()) {
-				Product p = it.next();
-				if (p.getProductname().equalsIgnoreCase(productName.trim())) {
-					it.remove();
-					saveProducts();
-					return;
+			ArrayList<Product> list = entry.getValue();
+			for (int i = 0; i < list.size(); i++) {
+				Product p = list.get(i);
+				if (p.getProductname().equalsIgnoreCase(updatedProduct.getProductname())) {
+					// 找到产品，更新其信息
+					list.set(i, updatedProduct);
+					saveAllProducts(); // 更新后保存
+					return true;
 				}
 			}
 		}
+		return false;
 	}
 
-	public void updateProduct(Product updatedProduct) {
-		// 根据产品名找到旧的产品并替换
-		String productName = updatedProduct.getProductname();
-		for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
-			ArrayList<Product> products = entry.getValue();
-			for (int i = 0; i < products.size(); i++) {
-				if (products.get(i).getProductname().equalsIgnoreCase(productName.trim())) {
-					products.set(i, updatedProduct);
-					saveProducts();
-					return;
-				}
-			}
-		}
-	}
-
-	public Product queryProduct(String productName) {
-		for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
-			for (Product p : entry.getValue()) {
-				if (p.getProductname().equalsIgnoreCase(productName.trim())) {
-					return p;
-				}
-			}
-		}
-		return null;
-	}
-
-	public void saveProducts() {
-		// 将dataTable中的数据写回product.db
+	/**
+	 * 将当前dataTable中的产品信息全部写回到PRODUCT_FILE_NAME文件中
+	 */
+	public void saveAllProducts() {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(PRODUCT_FILE_NAME))) {
 			for (Map.Entry<String, ArrayList<Product>> entry : dataTable.entrySet()) {
-				ArrayList<Product> products = entry.getValue();
-				for (Product p : products) {
-					String line = p.getProductname() + ","
-							+ p.getCas() + ","
-							+ p.getStructure() + ","
-							+ p.getFormula() + ","
-							+ p.getPrice() + ","
-							+ p.getRealstock() + ","
-							+ p.getCategory();
+				for (Product p : entry.getValue()) {
+					String line = p.getProductname() + "," + p.getCas() + "," + p.getStructure() + ","
+							+ p.getFormula() + "," + p.getPrice() + "," + p.getRealstock() + "," + p.getCategory();
 					writer.write(line);
 					writer.newLine();
 				}
 			}
+			writer.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
+			log("保存产品数据时发生异常:" + e);
 		}
 	}
 
