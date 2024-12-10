@@ -1,6 +1,8 @@
 package com.ascent.ui;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -32,7 +34,8 @@ public class MainFrame extends JFrame {
 
 		//v.1.0.1
 		productDataAccessor = new ProductDataAccessor();
-		productPanel = new ProductPanel(this);
+		productDataAccessor.load(); // 初次加载数据 v1.0.2
+		productPanel = new ProductPanel(this, productDataAccessor);//v1.0.2
 		tabbedPane.addTab("药品", productPanel);
 
 		if (currentUser != null && currentUser.getAuthority() == 1) {
@@ -42,6 +45,20 @@ public class MainFrame extends JFrame {
 		}
 
 		container.add(BorderLayout.CENTER, tabbedPane);
+
+		// 添加选项卡监听器 v1.0.2
+		tabbedPane.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				int index = tabbedPane.getSelectedIndex();
+				String title = tabbedPane.getTitleAt(index);
+				if ("药品".equals(title)) {
+					// 当点击“药品”标签时重新加载数据并刷新界面
+					productDataAccessor.load();
+					productPanel.refreshData();
+				}
+			}
+		});
 
 		JMenuBar myMenuBar = new JMenuBar();
 
