@@ -55,6 +55,12 @@ public class AddProductDialog extends JDialog {
 
         okBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                // 校验非空
+                if (isAnyFieldEmpty()) {
+                    JOptionPane.showMessageDialog(AddProductDialog.this, "有信息为空，请完整填写药品信息！", "错误", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 String name = nameField.getText().trim();
                 String cas = casField.getText().trim();
                 String structure = structureField.getText().trim();
@@ -62,6 +68,7 @@ public class AddProductDialog extends JDialog {
                 String price = priceField.getText().trim();
                 String stock = stockField.getText().trim();
                 String category = categoryField.getText().trim();
+
                 Product p = new Product(name, cas, structure, formula, price, stock, category);
                 dataAccessor.addProduct(p);
                 dataAccessor.saveAllProducts(); // 保存到文件
@@ -74,5 +81,15 @@ public class AddProductDialog extends JDialog {
 
         pack();
         setLocationRelativeTo(owner);
+    }
+
+    private boolean isAnyFieldEmpty() {
+        return nameField.getText().trim().isEmpty() ||
+                casField.getText().trim().isEmpty() ||
+                structureField.getText().trim().isEmpty() ||
+                formulaField.getText().trim().isEmpty() ||
+                priceField.getText().trim().isEmpty() ||
+                stockField.getText().trim().isEmpty() ||
+                categoryField.getText().trim().isEmpty();
     }
 }

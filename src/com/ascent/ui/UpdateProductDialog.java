@@ -120,6 +120,12 @@ public class UpdateProductDialog extends JDialog {
 
         okBtn.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                // 校验非空（即使是修改，所有字段仍要求非空）
+                if (isAnyFieldEmpty()) {
+                    JOptionPane.showMessageDialog(UpdateProductDialog.this, "有信息为空，请完整填写药品信息！", "错误", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 String name = nameField.getText().trim();
                 Product updated = new Product(
                         name,
@@ -149,6 +155,16 @@ public class UpdateProductDialog extends JDialog {
 
         pack();
         setLocationRelativeTo(owner);
+    }
+
+    private boolean isAnyFieldEmpty() {
+        return nameField.getText().trim().isEmpty() ||
+                casField.getText().trim().isEmpty() ||
+                structureField.getText().trim().isEmpty() ||
+                formulaField.getText().trim().isEmpty() ||
+                priceField.getText().trim().isEmpty() ||
+                stockField.getText().trim().isEmpty() ||
+                categoryField.getText().trim().isEmpty();
     }
 
     private Product findProductByName(String name) {
